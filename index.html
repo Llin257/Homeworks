@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script src="http://cooper-union-maps-proxy.herokuapp.com/js/draw.js"></script>
+    <link rel="stylesheet" href="http://s3.amazonaws.com/codecademy-content/courses/ltp/css/bootstrap.css">
+    
+
+    <script>
+
+      $(document).ready(function(){
+
+        var ask = prompt("What would you like to search for?");
+        //getting the data from instagram
+        $.getJSON("http://cooper-union-instagram-proxy.herokuapp.com/search/tag/"+ ask+ "?count=100", function(response){
+          //create the placeholder for valid images
+          var instagramPositions = [];
+          //looping through the response from instagram
+          for(var i=0; i<response.length; i++) {
+            //if the current response has location data
+            if(response[i].location != null) {
+              var longi = 0;
+              var lati = 0;
+              longi = longi + response[i].location.longitude;
+              lati= lati + response[i].location.latitude;
+              console.log(lati);
+              console.log(longi);
+              var finallong = longi / i;
+              var finallati = lati / i;
+              //construct the photoMarker object
+              var photoMarker = {
+                'title': response[i].caption.text,
+                'map': new google.maps.LatLng(response[i].location.latitude, response[i].location.longitude),
+                'link':response[i].link,
+                'html':"<img src="+response[i].images.thumbnail.url+" />"
+              }
+              //push the photoMarker object onto instagramPositions array
+              instagramPositions.push(photoMarker);
+
+              
+            } //end of "if the photo has location data"
+          } //end of the for loop, iterating through the photos
+          //set up the map configuration
+
+          var mapOptions = {
+            zoom: 2,
+            center: new google.maps.LatLng(finallati, finallong)
+          };
+          draw('map', mapOptions, instagramPositions);
+        });
+      });
+
+    </script>
+    <style>
+        html, body {
+                    height: 100%;
+                    }
+        #map {
+                    min-height: 100%;   
+              }
+
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+        <script>
+      $.getJSON("http://cooper-union-instagram-proxy.herokuapp.com/search/tag/nyc", function(response){
+        console.log(response);
+        for(var i=0; i<8; i++) {
+          $("body").append("<img src="+response[i].images.thumbnail.url+" />");
+        }
+      });
+        </script>
+
+</body>
+</html>
